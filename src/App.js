@@ -51,8 +51,8 @@ function App() {
       Total_Pedido: total.toFixed(2), // Total añadido
     };
     
-    // URL absoluta del webhook de n8n
-    const webhookUrl = process.env.REACT_APP_WEBHOOK_URL;
+  // URL de la función serverless en Netlify
+  const webhookUrl = '/.netlify/functions/create-order';
 
     try {
       const response = await fetch(webhookUrl, {
