@@ -64,7 +64,15 @@ function App() {
       });
 
       if (!response.ok) {
-        throw new Error("Hubo un problema al enviar el pedido.");
+        // Intenta leer el mensaje de error del backend
+        let errorMsg = "Hubo un problema al enviar el pedido.";
+        try {
+          const errorData = await response.json();
+          if (errorData && errorData.error) {
+            errorMsg = errorData.error;
+          }
+        } catch {}
+        throw new Error(errorMsg);
       }
 
       setSuccess(`¡Gracias por tu pedido, ${name}! Lo recibimos correctamente.`);
