@@ -22,8 +22,14 @@ function App() {
 
   // --- Cálculos ---
   const total = (classicCount * CLASSIC_PRICE) + (chocolateCount * CHOCOLATE_PRICE);
-  const minPickupTime = new Date();
-  minPickupTime.setHours(minPickupTime.getHours() + 6);
+
+  const filterPickupTime = (time) => {
+    const sixHoursFromNow = new Date(new Date().getTime() + 6 * 60 * 60 * 1000);
+    const selectedDateTime = new Date(time);
+    const hour = selectedDateTime.getHours();
+    const isWithinBusinessHours = hour >= OPENING_TIME && hour < CLOSING_TIME;
+    return selectedDateTime >= sixHoursFromNow && isWithinBusinessHours;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,7 +52,7 @@ function App() {
     };
     
     // URL absoluta del webhook de n8n
-    const webhookUrl = "https://n8n.srv943892.hstgr.cloud/webhook/bdfec8dd-7b6d-4206-ba4d-648ad5097138";
+    const webhookUrl = process.env.REACT_APP_WEBHOOK_URL;
 
     try {
       const response = await fetch(webhookUrl, {
@@ -113,18 +119,18 @@ function App() {
                 <div className="mb-3">
                   <label className="form-label">Medialunas Clásicas (${CLASSIC_PRICE.toFixed(2)} c/u)</label>
                   <div className="input-group">
-                    <button className="btn btn-outline-secondary" type="button" onClick={() => setClassicCount(Math.max(0, classicCount - 1))}>-</button>
+                    <button className="btn btn-outline-secondary" type="button" onClick={() => setClassicCount(Math.max(0, classicCount - 1))} aria-label="Disminuir cantidad de medialunas clásicas">-</button>
                     <input type="text" className="form-control text-center" value={classicCount} readOnly />
-                    <button className="btn btn-outline-secondary" type="button" onClick={() => setClassicCount(classicCount + 1)}>+</button>
+                    <button className="btn btn-outline-secondary" type="button" onClick={() => setClassicCount(classicCount + 1)} aria-label="Aumentar cantidad de medialunas clásicas">+</button>
                   </div>
                 </div>
 
                 <div className="mb-3">
                   <label className="form-label">Medialunas de Chocolate (${CHOCOLATE_PRICE.toFixed(2)} c/u)</label>
                   <div className="input-group">
-                    <button className="btn btn-outline-secondary" type="button" onClick={() => setChocolateCount(Math.max(0, chocolateCount - 1))}>-</button>
+                    <button className="btn btn-outline-secondary" type="button" onClick={() => setChocolateCount(Math.max(0, chocolateCount - 1))} aria-label="Disminuir cantidad de medialunas de chocolate">-</button>
                     <input type="text" className="form-control text-center" value={chocolateCount} readOnly />
-                    <button className="btn btn-outline-secondary" type="button" onClick={() => setChocolateCount(chocolateCount + 1)}>+</button>
+                    <button className="btn btn-outline-secondary" type="button" onClick={() => setChocolateCount(chocolateCount + 1)} aria-label="Aumentar cantidad de medialunas de chocolate">+</button>
                   </div>
                 </div>
 
@@ -139,8 +145,7 @@ function App() {
                     onChange={(date) => setPickupTime(date)}
                     minDate={new Date()}
                     filterDate={date => !CLOSED_DAYS.includes(date.getDay())}
-                    minTime={new Date(new Date().setHours(OPENING_TIME, 0))}
-                    maxTime={new Date(new Date().setHours(CLOSING_TIME, 0))}
+                    filterTime={filterPickupTime}
                     showTimeSelect
                     dateFormat="MMMM d, yyyy h:mm aa"
                     placeholderText="Selecciona una fecha y hora"
